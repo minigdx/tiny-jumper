@@ -433,8 +433,10 @@ local coins = {}
 local endLevel = nil
 local endScreen = nil
 local endTitle = nil
+local endGameTransition = nil
 
 function _init(w, h)
+    endGameTransition = nil
     platforms = {}
     coins = {}
     gravity = vec2.create(0, 0.1)
@@ -553,9 +555,14 @@ function _update()
         checkCollisions()
     end
 
-    if bob.y > map.height() then
+    if bob.y > map.height() and not endGameTransition then
         -- end game
-        debug.console("end game")
+        endGameTransition = 1.5
+    elseif endGameTransition then
+        endGameTransition = endGameTransition - tiny.dt
+        if endGameTransition < 0 then
+            tiny.exit(0)
+        end
     end
 
     endLevel:_update()
@@ -582,4 +589,8 @@ function _draw()
     bob:_draw()
 
     endTitle:_draw()
+
+    if endGameTransition then
+        shape.circlef(256 * 0.5, bob.y_camera + 384 * 0.5, juice.powIn2(0, 356, 1.5 - endGameTransition), 1)
+    end
 end
